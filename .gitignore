@@ -1,0 +1,6 @@
+# 本地凭证，不要提交
+config.json
+
+# Python 缓存
+__pycache__/
+*.pyc
