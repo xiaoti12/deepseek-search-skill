@@ -14,15 +14,15 @@
 └── config.json           # 本地凭证（config --init 生成，已 gitignore）
 ```
 
-## 安装（可选）
+## 安装
 
-当前只存在于仓库中，需要时再软链到 skills 目录（软链本目录即可）：
+已软链到 `~/.agents/skills/deepseek-search`，pi / Claude Code 会自动发现：
 
 ```bash
-ln -s "$PWD" ~/.claude/skills/deepseek-search
-# 或
-ln -s "$PWD" ~/.agents/skills/deepseek-search
+ln -sfn "$PWD" ~/.agents/skills/deepseek-search   # 已执行
 ```
+
+换机器时重新执行上面这条即可。仓库保持为唯一源码副本，修改后 `git commit` 即生效。
 
 ## 配置
 

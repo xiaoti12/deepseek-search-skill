@@ -33,7 +33,7 @@ from concurrent.futures import ThreadPoolExecutor
 SEARCH_PATH = "/v1/tools/search"
 FETCH_PATH = "/v1/tools/fetch"
 DEFAULT_BASE = "https://api.deepseek.com"
-SKILL_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SKILL_DIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 DEFAULT_CONFIG = os.path.join(SKILL_DIR, "config.json")
 RETRY_STATUS = {408, 429, 500, 502, 503, 504}
 USER_AGENT = "deepseek-search-skill/1.0"
@@ -202,6 +202,19 @@ def short_date(value) -> str | None:
     return text[:10] if len(text) >= 10 else text
 
 
+def decode_site_name(value) -> str:
+    """部分结果的 site_name 是 utf-8 字节的十六进制串，还原成可读文本。"""
+    text = str(value or "")
+    if len(text) >= 6 and len(text) % 2 == 0 and re.fullmatch(r"[0-9a-fA-F]+", text):
+        try:
+            decoded = bytes.fromhex(text).decode("utf-8")
+            if decoded.isprintable():
+                return decoded
+        except (ValueError, UnicodeDecodeError):
+            pass
+    return text
+
+
 def ensure_save_dir(given: str | None) -> str:
     if given:
         os.makedirs(given, exist_ok=True)
@@ -264,11 +277,11 @@ def render_search(payload: dict, query: str, args, save_dir: str) -> int:
     for index, item in enumerate(kept, 1):
         meta = []
         if item.get("site_name"):
-            meta.append(f"site={item['site_name']}")
+            meta.append(f"site={decode_site_name(item['site_name'])}")
         if short_date(item.get("date")):
             meta.append(f"date={short_date(item.get('date'))}")
         if item.get("rerank_score") is not None:
-            meta.append(f"score={item['rerank_score']}")
+            meta.append(f"score={float(item['rerank_score']):.1f}")
         if item.get("authority") is not None:
             meta.append(f"authority={item['authority']}")
 
